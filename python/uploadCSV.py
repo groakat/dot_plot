@@ -61,7 +61,7 @@ def plot_file(filename):
     fig = plt.figure(figsize=(len(d) * 2 + 2, 12))    
     for i in range(len(d)):
         hist = np.histogram(d[i], bins=4, range=(1,6))
-        dp.plotDotPlot(hist, space=0.15, os=i*2, width=5, facecolors='black',marker='o', s=10)
+        dp.plotDotPlot(hist, space=0.15, os=i*2, width=5, facecolors='black',marker='o', s=15)
         x += [[i*2, header[i]]]
         
     plt.axes().set_aspect('equal')
@@ -72,6 +72,14 @@ def plot_file(filename):
     plt.xticks(zip(*x)[0], zip(*x)[1] )
     plt.yticks(range(1,6))
     
+    for tick in plt.axes().get_xaxis().get_major_ticks():
+        tick.set_pad(15)
+        tick.label1 = tick._get_text1()
+        
+    for tick in plt.axes().get_yaxis().get_major_ticks():
+        tick.set_pad(15)
+        tick.label1 = tick._get_text1()
+    
     fn = filename.split('.csv')[0] + '.png'
     fig.savefig(os.path.join(app.config['UPLOAD_FOLDER'], 
                 fn),dpi=300, format='png')
@@ -81,5 +89,6 @@ def plot_file(filename):
     
                                
 if __name__ == "__main__":
+    mpl.rcParams.update({'font.size': 28, })
     app.run()#debug=True)
 
