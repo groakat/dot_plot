@@ -9,10 +9,10 @@ sys.path.append('/home/peter/code/plotting/')
 import numpy as np
 import matplotlib as mpl
 import pylab as plt
-import plotting.python.dotPlot as dp
+import dotPlot as dp
 
 
-UPLOAD_FOLDER = '/home/peter/code/plotting/uploads'
+UPLOAD_FOLDER = '../uploads'
 ALLOWED_EXTENSIONS = set(['csv'])
 
 app = Flask(__name__)
@@ -24,14 +24,15 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    print "upload"
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return plot_file(filename=filename)
-            #~ return redirect(url_for('uploaded_file',
-                                    #~ filename=filename))
+            # return redirect(url_for('uploaded_file',
+            #                         ~ filename=filename))
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -39,6 +40,7 @@ def upload_file():
     <form action="" method=post enctype=multipart/form-data>
       <p><input type=file name=file>
          <input type=submit value=Upload>
+         <input type=checkbox name=do_vector value="do_vector"> generate vector graphic
     </form>
     '''
         
@@ -47,7 +49,7 @@ def show_file(filename):
     print "show file"
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
-#~ @app.route('/uploads/<filename>')
+@app.route('/uploads/<filename>')
 def plot_file(filename):
     
     print "plotting"
@@ -60,7 +62,7 @@ def plot_file(filename):
     x = []
     fig = plt.figure(figsize=(len(d) * 2 + 2, 12))    
     for i in range(len(d)):
-        hist = np.histogram(d[i], bins=4, range=(1,6))
+        hist = np.histogram(d[i], bins=5, range=(1,6))
         dp.plotDotPlot(hist, space=0.15, os=i*2, width=5, facecolors='black',marker='o', s=15)
         x += [[i*2, header[i]]]
         
@@ -79,16 +81,23 @@ def plot_file(filename):
     for tick in plt.axes().get_yaxis().get_major_ticks():
         tick.set_pad(15)
         tick.label1 = tick._get_text1()
+        
+    plt.setp(plt.xticks()[1], rotation=20)
+        
+    if request.form.getlist("do_vector"):
+        extension = 'svg'
+    else:
+        extension = 'png'
     
-    fn = filename.split('.csv')[0] + '.png'
+    fn = filename.split('.csv')[0] + '.' + extension
     fig.savefig(os.path.join(app.config['UPLOAD_FOLDER'], 
-                fn),dpi=300, format='png')
+                fn),dpi=300, format=extension)
                 
     return redirect(url_for('show_file', filename=fn))
                               
     
                                
 if __name__ == "__main__":
-    mpl.rcParams.update({'font.size': 28, })
-    app.run()#debug=True)
+    mpl.rcParams.update({'font.size': 28, 'svg.fonttype': 'none'})
+    app.run(debug=True)
 
