@@ -186,6 +186,8 @@ def plot_matplot_lib(df, show=False):
     if show:
         plt.show()
 
+    return fig
+
 
 def save_xlsx(df, filename):
     import xlsxwriter
@@ -244,7 +246,7 @@ def save_xlsx(df, filename):
 
 
 def save_plot(xs, ys, header, filename):
-    plot_matplot_lib(xs, ys, header, show=False)
+    fig = plot_matplot_lib(xs, ys, header, show=False)
     fig.savefig(filename, dpi=300, format=filename.split('.')[-1])
 
 
@@ -252,7 +254,7 @@ def read_csv(filename):
     import os, io
     import pandas as pd
 
-    df = pd.read_csv(filename, delimiter='\t')
+    df = pd.read_csv(filename)
 
     return df
 

@@ -12,7 +12,7 @@ import pylab as plt
 import dotPlot as dp
 
 
-UPLOAD_FOLDER = '../uploads'
+UPLOAD_FOLDER = 'upload'
 ALLOWED_EXTENSIONS = set(['csv'])
 
 app = Flask(__name__)
@@ -53,37 +53,10 @@ def show_file(filename):
 def plot_file(filename):
     
     print "plotting"
-    
-    with io.open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'r') as f:
-        header = f.readline().strip('\n').split('\t')
-        a = np.genfromtxt(f, delimiter='\t', missing_values='')
-                    
-    d =  zip(*a)
-    x = []
-    fig = plt.figure(figsize=(len(d) * 2 + 2, 12))    
-    for i in range(len(d)):
-        hist = np.histogram(d[i], bins=5, range=(1,6))
-        dp.plotDotPlot(hist, space=0.15, os=i*2, width=5, facecolors='black',marker='o', s=15)
-        x += [[i*2, header[i]]]
         
-    plt.axes().set_aspect('equal')
-    plt.axes().set_autoscale_on(False)
-    plt.axes().set_ybound(0,6)
-    plt.axes().set_xbound(-0.9, i* 2 + 0.9)
-    
-    plt.xticks(zip(*x)[0], zip(*x)[1] )
-    plt.yticks(range(1,6))
-    
-    for tick in plt.axes().get_xaxis().get_major_ticks():
-        tick.set_pad(15)
-        tick.label1 = tick._get_text1()
-        
-    for tick in plt.axes().get_yaxis().get_major_ticks():
-        tick.set_pad(15)
-        tick.label1 = tick._get_text1()
-        
-    plt.setp(plt.xticks()[1], rotation=20)
-        
+    df = dp.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    fig = dp.plot_matplot_lib(df)
+
     if request.form.getlist("do_vector"):
         extension = 'svg'
     else:
